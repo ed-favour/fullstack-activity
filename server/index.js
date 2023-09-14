@@ -11,11 +11,7 @@ app.use(
   })
 );
 
-const data = [
-  { id: "1", task: "Take a bath", is_completed: true },
-  { id: "2", task: "Take a walk", is_completed: true },
-  { id: "3", task: "Walk the dog", is_completed: true },
-];
+app.use(express.json())
 
 app.get("/", (req, res) => {
   res.send("hello");
@@ -33,11 +29,11 @@ app.get("/api/todos", async (req, res) => {
 });
 
 app.post("/api/todos", async(req, res) => {
-  const newTodo =req.body;
-  console.log(newTodo);
-  const todos2 = await sql `insert into todos (task, is_completed) values('Eat jellof rice', false)`
+  const  { task, is_completed } =req.body;
+  // console.log(newTodo);
+  const todos2 = await sql `INSERT INTO todos (task, is_completed) VALUES (${task}, ${is_completed}) RETURNING *`
    if (todos2) {
-    res.status(201).send(`successfully inserted`);
+    res.status(201).send(todos2);
     
    } else {
     res.status(500).send("Internal server error");
@@ -46,6 +42,46 @@ app.post("/api/todos", async(req, res) => {
 
 })
 
+
+app.put("/api/todos2/:id", async (req, res) => {
+  const { id } = req.params;
+  const { task, is_completed } = req.body;
+
+  try {
+    const updatedTodo = await sql`
+      UPDATE todos
+      SET task = ${task}, is_completed = ${is_completed}
+      WHERE id = ${id}
+      RETURNING *
+    `;
+
+    if (updatedTodo && updatedTodo.length > 0) {
+      res.status(200).json(updatedTodo[0]);
+    } else {
+      res.status(404).send("Todo not found");
+    }
+  } catch (error) {
+    console.error("Error updating todo:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+app.delete("/api/todos2/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedTodo = await sql`DELETE FROM todos WHERE id = ${id} RETURNING *`;
+    
+    if (deletedTodo && deletedTodo.length > 0) {
+      res.status(200).json(deletedTodo[0]);
+    } else {
+      res.status(404).send("Todo not found");
+    }
+  } catch (error) {
+    console.error("Error deleting todo:", error);
+    res.status(500).send("Internal server error");
+  }
+});
 
 
 // app.get("/api/todos2", async(req, res) => {
