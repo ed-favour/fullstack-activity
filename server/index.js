@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 
 import sql from "./db.js";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express"
+import options from "./swagger.js";
 
 const app = express();
 
@@ -96,6 +99,10 @@ app.delete("/api/todos2/:id", async (req, res) => {
 
 // })
 
-app.listen(3000, () => {
-  console.log("server is listening on port 3000");
+const specs = swaggerJSDoc(options)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+
+const PORT = 3000
+app.listen(PORT, () => {
+  console.log(`server is listening on port ${PORT}`);
 });

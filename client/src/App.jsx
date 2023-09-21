@@ -4,7 +4,7 @@ import "./App.css";
 
 function App() {
   // eslint-disable-next-line no-undef
-  const taskRef = useRef();
+  // const taskRef = useRef();
 
   const [todos, setTodos] = useState([]);
   const [taskInputValue, setTaskInputValue] = useState("");
